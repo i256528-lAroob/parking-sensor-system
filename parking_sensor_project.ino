@@ -31,16 +31,16 @@ void setup() {
     readings[i] = 0;
   }
   
+  delay(2000);
+  lcd.clear();
+
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(buzzer, OUTPUT);
   pinMode(redLED, OUTPUT);
   pinMode(yellowLED, OUTPUT);
   pinMode(greenLED, OUTPUT);
-  
   Serial.begin(9600);
-  delay(2000); 
-  lcd.clear();
 }
 
 void loop() {
@@ -51,20 +51,22 @@ void loop() {
   digitalWrite(trigPin, LOW);
   
   duration = pulseIn(echoPin, HIGH);
-  distance = duration * 0.034 / 2; 
-  
+  distance = duration * 0.034 / 2;
+
   total = total - readings[readIndex];    
   readings[readIndex] = distance;        
   total = total + readings[readIndex];    
   readIndex = readIndex + 1;
 
   if (readIndex >= numReadings) {
-    readIndex = 0;                        
+    readIndex = 0;                       
   }
+
   averageDistance = total / numReadings;  
 
   lcd.setCursor(0, 0);
-  if (averageDistance > 0 && averageDistance <= 40) {
+  
+  if (averageDistance > 0 && averageDistance <= 25) {
     lcd.print("Dist: ");
     lcd.print(averageDistance);
     lcd.print(" cm    "); 
@@ -74,38 +76,35 @@ void loop() {
 
   lcd.setCursor(0, 1); 
 
-  if (averageDistance > 0 && averageDistance <= 8) { 
+  Serial.print("Average Distance: ");
+  Serial.println(averageDistance);
+
+
+  if (averageDistance > 0 && averageDistance <= 5) { 
     lcd.print("STATUS: STOP!   ");
     digitalWrite(redLED, HIGH);
     digitalWrite(yellowLED, LOW);
     digitalWrite(greenLED, LOW);
-    tone(buzzer, 3000); 
+    tone(buzzer, 2500); 
   } 
-  
-  else if (averageDistance > 8 && averageDistance <= 20) { 
+  else if (averageDistance > 5 && averageDistance <= 12) { 
     lcd.print("STATUS: WARNING ");
     digitalWrite(redLED, LOW);
     digitalWrite(yellowLED, HIGH);
     digitalWrite(greenLED, LOW);
     
-    tone(buzzer, 1500); 
-    delay(60);          
+    tone(buzzer, 1200); 
+    delay(80);          
     noTone(buzzer);
-    delay(60);          
+    delay(80);          
   } 
-  
-  else if (averageDistance > 20 && averageDistance <= 40) { 
-    lcd.print("STATUS: CAUTION ");
+  else if (averageDistance > 12 && averageDistance <= 25) { 
+    lcd.print("STATUS: CLEAR   ");
     digitalWrite(redLED, LOW);
     digitalWrite(yellowLED, LOW);
     digitalWrite(greenLED, HIGH);
-    
-    tone(buzzer, 1000); 
-    delay(250);         
-    noTone(buzzer);
-    delay(250);         
+    noTone(buzzer); 
   } 
-  
   else {
     lcd.print("STATUS: IDLE    ");
     digitalWrite(redLED, LOW);
@@ -114,8 +113,5 @@ void loop() {
     noTone(buzzer);
   }
 
-  Serial.print("Average Distance: ");
-  Serial.println(averageDistance);
-
-  delay(20); 
+  delay(30); 
 }
